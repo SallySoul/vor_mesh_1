@@ -58,6 +58,14 @@ impl<TC: InCircleTest<Point = Vec2d>, TT: InTriangleTest, TO: TriangleOrientatio
         );
     }
 
+    pub fn in_circle(&self, ti: usize, p: &Vec2d) -> bool {
+        let t = self.triangles[ti];
+        let a = &self.points[t.a];
+        let b = &self.points[t.b];
+        let c = &self.points[t.c];
+        self.ic_test.in_circle(a, b, c, p) == InCircle::In
+    }
+
     pub fn add_point(&mut self, p: Vec2d) -> usize {
         let i = self.points.len();
         self.points.push(p);

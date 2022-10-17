@@ -64,6 +64,9 @@ where
 ///   └────────┘           └────────┘
 ///  A    n2    D         A    n2    D
 ///  ```
+///  This means that the output of this function will always be the same regardless
+///  of the ordering of the input triangles.
+///  The output will always have t0 as `ADC` and t1 `DBC`
 fn flip<TC, TT, TO>(mesh: &mut DelaunayMesh2d<TC, TT, TO>, t0: Triangle, t0i: usize)
 where
     TC: InCircleTest<Point = Vec2d>,
@@ -133,7 +136,7 @@ mod unit_tests {
     use super::*;
 
     #[test]
-    fn flip_ab() {
+    fn flip_ab_1() {
         let mut m = Simple2DMesh::empty();
         let a = m.add_point(vec2![0.0, 0.0]);
         let b = m.add_point(vec2![1.0, 1.0]);
@@ -153,6 +156,82 @@ mod unit_tests {
         m.triangles[1].ab = n3;
         m.triangles[1].bc = t0;
         m.triangles[1].ca = n2;
+        super::flip_ab(&mut m, 0);
+        assert_eq!(m.points.len(), 4);
+        assert_eq!(m.triangles.len(), 2);
+        assert_eq!(m.triangles[0].a, a);
+        assert_eq!(m.triangles[0].b, d);
+        assert_eq!(m.triangles[0].c, c);
+        assert_eq!(m.triangles[0].ab, n2);
+        assert_eq!(m.triangles[0].bc, t1);
+        assert_eq!(m.triangles[0].ca, n1);
+        assert_eq!(m.triangles[1].a, d);
+        assert_eq!(m.triangles[1].b, b);
+        assert_eq!(m.triangles[1].c, c);
+        assert_eq!(m.triangles[1].ab, n3);
+        assert_eq!(m.triangles[1].bc, n4);
+        assert_eq!(m.triangles[1].ca, t0);
+    }
+
+    #[test]
+    fn flip_ab_2() {
+        let mut m = Simple2DMesh::empty();
+        let a = m.add_point(vec2![0.0, 0.0]);
+        let b = m.add_point(vec2![1.0, 1.0]);
+        let c = m.add_point(vec2![0.0, 1.0]);
+        let d = m.add_point(vec2![1.0, 0.0]);
+        let n1 = 5;
+        let n2 = 7 ;
+        let n3 = 11;
+        let n4 = 13;
+        let t0 = 0;
+        let t1 = 1;
+        assert_eq!(t0, m.add_triangle(a, b, c));
+        m.triangles[0].ab = t1;
+        m.triangles[0].bc = n4;
+        m.triangles[0].ca = n1;
+        assert_eq!(t1, m.add_triangle(b, a, d));
+        m.triangles[1].ab = t0;
+        m.triangles[1].bc = n2;
+        m.triangles[1].ca = n3;
+        super::flip_ab(&mut m, 0);
+        assert_eq!(m.points.len(), 4);
+        assert_eq!(m.triangles.len(), 2);
+        assert_eq!(m.triangles[0].a, a);
+        assert_eq!(m.triangles[0].b, d);
+        assert_eq!(m.triangles[0].c, c);
+        assert_eq!(m.triangles[0].ab, n2);
+        assert_eq!(m.triangles[0].bc, t1);
+        assert_eq!(m.triangles[0].ca, n1);
+        assert_eq!(m.triangles[1].a, d);
+        assert_eq!(m.triangles[1].b, b);
+        assert_eq!(m.triangles[1].c, c);
+        assert_eq!(m.triangles[1].ab, n3);
+        assert_eq!(m.triangles[1].bc, n4);
+        assert_eq!(m.triangles[1].ca, t0);
+    }
+
+    #[test]
+    fn flip_ab_3() {
+        let mut m = Simple2DMesh::empty();
+        let a = m.add_point(vec2![0.0, 0.0]);
+        let b = m.add_point(vec2![1.0, 1.0]);
+        let c = m.add_point(vec2![0.0, 1.0]);
+        let d = m.add_point(vec2![1.0, 0.0]);
+        let n1 = 5;
+        let n2 = 7 ;
+        let n3 = 11;
+        let n4 = 13;
+        let t0 = 0;
+        let t1 = 1;
+        assert_eq!(t0, m.add_triangle(a, b, c));
+        m.triangles[0].ab = t1;
+        m.triangles[0].bc = n4;
+        m.triangles[0].ca = n1;
+        assert_eq!(t1, m.add_triangle(a, d, b));
+        m.triangles[1].ab = n2;
+        m.triangles[1].bc = n3;
+        m.triangles[1].ca = t0;
         super::flip_ab(&mut m, 0);
         assert_eq!(m.points.len(), 4);
         assert_eq!(m.triangles.len(), 2);
