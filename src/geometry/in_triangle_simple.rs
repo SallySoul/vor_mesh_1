@@ -32,6 +32,10 @@ impl InTriangleTest for InTriangleSimple {
             InTriangle::OnC
         } else if u == 0.0 && v == 1.0 {
             InTriangle::OnB
+        } else if v < 0.0 {
+            InTriangle::OutsideCA
+        } else if u < 0.0 {
+            InTriangle::OutsideAB
         } else if u > 0.0 && u < 1.0 && v == 0.0 {
             InTriangle::OnAB
         } else if u + v == 1.0 {
@@ -40,17 +44,14 @@ impl InTriangleTest for InTriangleSimple {
             InTriangle::OnCA
         } else if u > 0.0 && v > 0.0 && u + v < 1.0 {
             InTriangle::In
-        } else if v < 0.0 {
-            InTriangle::OutsideCA
         } else if u + v > 1.0 {
             InTriangle::OutsideBC
-        } else if u < 0.0 {
-            InTriangle::OutsideAB
+        
         } else {
             panic!("Bad InTriangle test?, u: {}, v: {}", u, v);
         };
 
-        println!("u: {}, v: {}", u, v);
+        println!("u: {}, v: {}, r: {:?}", u, v, result);
 
         result
     }
@@ -58,14 +59,12 @@ impl InTriangleTest for InTriangleSimple {
 
 #[cfg(test)]
 mod unit_tests {
-    use std::f64::consts::PI;
-
     use super::*;
 
     #[test]
     fn simple_cases_1() {
         let t = InTriangleSimple::new();
-        let o = OrientTriangleSimple::new();
+        let o = TriangleOrientationSimple::new();
 
         let a = vec2![1.0, 0.0];
         let b = vec2![4.0, 0.0];
@@ -113,7 +112,7 @@ mod unit_tests {
     #[test]
     fn simple_cases_2() {
         let t = InTriangleSimple::new();
-        let o = OrientTriangleSimple::new();
+        let o = TriangleOrientationSimple::new();
 
         let a = vec2![-2.0, -3.0];
         let b = vec2![3.0, -1.0];
@@ -152,47 +151,6 @@ mod unit_tests {
                 "{:?}",
                 p
             );
-        }
-    }
-
-    #[test]
-    fn in_triangle() {
-        let t = InTriangleSimple::new();
-
-        let a = vec2![0.0, 0.0];
-        let b = vec2![0.0, 1.0];
-        let c = vec2![1.0, 0.0];
-
-        println!("In");
-        let p = vec2![0.1, 0.1];
-        t.in_triangle(&a, &b, &c, &p);
-
-        println!("On A");
-        t.in_triangle(&a, &b, &c, &a);
-        println!("On B");
-        t.in_triangle(&a, &b, &c, &b);
-        println!("On C");
-        t.in_triangle(&a, &b, &c, &c);
-
-        println!("Off ab");
-        let p = vec2![-1.0, 0.5];
-        t.in_triangle(&a, &b, &c, &p);
-
-        println!("Off bc");
-        let p = vec2![1.0, 1.0];
-        t.in_triangle(&a, &b, &c, &p);
-
-        println!("Off ca");
-        let p = vec2![0.5, -1.0];
-        t.in_triangle(&a, &b, &c, &p);
-
-        let s = 20;
-        for i in 0..s {
-            let r = 1.5;
-            let g = i as f64 * 2.0 * PI / s as f64;
-            let p = vec2![g.sin() * r, g.cos() * r];
-            print!("{}, {}: ", p.x, p.y);
-            t.in_triangle(&a, &b, &c, &p);
         }
     }
 }

@@ -1,10 +1,10 @@
 use crate::geometry::*;
 
-pub struct OrientTriangleSimple {}
+pub struct TriangleOrientationSimple {}
 
-impl TriangleOrientationTest for OrientTriangleSimple {
+impl TriangleOrientationTest for TriangleOrientationSimple {
     fn new() -> Self {
-        OrientTriangleSimple {}
+        TriangleOrientationSimple {}
     }
 
     fn triangle_orientation(&self, a: &Vec2d, b: &Vec2d, c: &Vec2d) -> TriangleOrientation {
@@ -28,7 +28,7 @@ mod unit_tests {
 
     #[test]
     fn all_cases() {
-        let t = OrientTriangleSimple::new();
+        let t = TriangleOrientationSimple::new();
         let a = vec2![0.0, 0.0];
         let b = vec2![1.0, 0.0];
         let c = vec2![0.0, 1.0];
@@ -56,7 +56,7 @@ mod unit_tests {
 
     #[test]
     fn inf_test() {
-        let t = OrientTriangleSimple::new();
+        let t = TriangleOrientationSimple::new();
         let a = vec2![std::f64::NEG_INFINITY, std::f64::NEG_INFINITY];
         let b = vec2![std::f64::INFINITY, std::f64::NEG_INFINITY];
         let c = vec2![std::f64::NEG_INFINITY, std::f64::INFINITY];
