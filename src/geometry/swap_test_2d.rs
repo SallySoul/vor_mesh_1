@@ -12,7 +12,7 @@ where
     } else if t1.bc == t0i {
         t1.a
     } else {
-        debug_assert!(t1.ca == t0i);
+        debug_assert_eq!(t1.ca, t0i);
         t1.b
     }
 }

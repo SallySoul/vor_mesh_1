@@ -231,6 +231,10 @@ impl<TC: InCircleTest<Point = Vec2d>, TT: InTriangleTest, TO: TriangleOrientatio
         self.triangles[t3].ab = t;
         self.triangles[t3].bc = t2;
         self.triangles[t3].ca = t0.ca;
+
+        swap_test_ab(self, t);
+        swap_test_bc(self, t2);
+        swap_test_ca(self, t3);
     }
 }
 

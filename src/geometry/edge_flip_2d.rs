@@ -47,6 +47,25 @@ where
     flip(mesh, t, ti);
 }
 
+/// For a given triangle (ni),
+/// we assert that one of the edges has neighbor t0
+/// and we want it to be t1
+pub fn swap_neighbor<TC, TT, TO>(mesh: &mut DelaunayMesh2d<TC, TT, TO>, ni: usize, t0: usize, t1: usize)
+where
+    TC: InCircleTest<Point = Vec2d>,
+    TT: InTriangleTest,
+    TO: TriangleOrientationTest,
+{
+    let n = &mut mesh.triangles[ni];
+    if n.ab == t0 {
+        n.ab = t1;
+    } else if n.bc == t0 {
+        n.bc = t1;
+    } else {
+        debug_assert!(n.ca == t0);
+        n.ca = t1;
+    }
+}
 /// We implement one flip operation
 /// However, we pass in a triangle that has been oriented such that
 /// Its always an ab flip
@@ -129,6 +148,9 @@ where
 
     mesh.debug_triangle_orientation(t0i);
     mesh.debug_triangle_orientation(t1i);
+
+    swap_neighbor(mesh, n2, t1i, t0i);
+    swap_neighbor(mesh, n4, t0i, t1i);
 }
 
 #[cfg(test)]
@@ -142,12 +164,23 @@ mod unit_tests {
         let b = m.add_point(vec2![1.0, 1.0]);
         let c = m.add_point(vec2![0.0, 1.0]);
         let d = m.add_point(vec2![1.0, 0.0]);
-        let n1 = 5;
-        let n2 = 7 ;
-        let n3 = 11;
-        let n4 = 13;
-        let t0 = 0;
-        let t1 = 1;
+        let n2p = m.add_point(vec2![0.5, -1.0]);
+        let n4p = m.add_point(vec2![0.5, 2.0]);
+        let t0 = 2;
+        let t1 = 3;
+
+        let n2 = m.add_triangle(n2p, d, a);
+        m.triangles[n2].ab = 22;
+        m.triangles[n2].bc = t1;
+        m.triangles[n2].ca = 23;
+
+        let n4 = m.add_triangle(n4p, c, b);
+        m.triangles[n2].ab = 32;
+        m.triangles[n2].bc = t0;
+        m.triangles[n2].ca = 33;
+
+        let n1 = 7 ;
+        let n3 = 13;
         assert_eq!(t0, m.add_triangle(a, b, c));
         m.triangles[0].ab = t1;
         m.triangles[0].bc = n4;
