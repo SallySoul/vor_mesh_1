@@ -89,7 +89,7 @@ pub fn swap_neighbor<TC, TT, TO>(
 ///  A    n2    D         A    n2    D
 ///  ```
 ///  This means that the output of this function will always be the same regardless
-///  of the ordering of the input triangles.
+///  of the rotation of the input triangles.
 ///  The output will always have t0 as `ADC` and t1 `DBC`
 fn flip<TC, TT, TO>(mesh: &mut DelaunayMesh2d<TC, TT, TO>, t0: Triangle, t0i: usize)
 where
