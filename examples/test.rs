@@ -1,4 +1,4 @@
-use vor_mesh_1::geometry::*; 
+use vor_mesh_1::geometry::*;
 
 fn main() {
     let ba = vec2![-100.0, -100.0];
@@ -8,7 +8,7 @@ fn main() {
 
     let pi = mesh.add_point(vec2![0.0, 0.0]);
     let ti = mesh.insert_point(pi, 0).unwrap();
-    
+
     let pi = mesh.add_point(vec2![-50.0, 0.0]);
     let ti = mesh.insert_point(pi, ti).unwrap();
 

@@ -6,7 +6,6 @@ pub enum DelaunayError {
     InsertedDuplicatePoint { original_index: usize },
 }
 
-
 pub struct DelaunayMesh2d<
     TC: InCircleTest<Point = Vec2d>,
     TT: InTriangleTest,
@@ -45,7 +44,7 @@ impl<TC: InCircleTest<Point = Vec2d>, TT: InTriangleTest, TO: TriangleOrientatio
             triangles: vec![Triangle::new(0, 1, 2)],
         }
     }
-    
+
     #[track_caller]
     pub fn debug_triangle_orientation(&self, ti: usize) {
         let t = self.triangles[ti];
@@ -72,12 +71,23 @@ impl<TC: InCircleTest<Point = Vec2d>, TT: InTriangleTest, TO: TriangleOrientatio
         i
     }
 
+    pub fn triangle(&self, ti: usize) -> &Triangle {
+        &self.triangles[ti]
+    }
+
     #[track_caller]
     pub fn add_triangle(&mut self, a: usize, b: usize, c: usize) -> usize {
         let i = self.triangles.len();
         self.triangles.push(Triangle::new(a, b, c));
         self.debug_triangle_orientation(i);
         i
+    }
+
+    #[track_caller]
+    pub fn set_triangle_neighbors(&mut self, ti: usize, ab: usize, bc: usize, ca: usize) {
+        self.triangles[ti].ab = ab;
+        self.triangles[ti].bc = bc;
+        self.triangles[ti].ca = ca;
     }
 
     pub fn insert_point(&mut self, pi: usize, ti: usize) -> Result<usize, DelaunayError> {
@@ -137,81 +147,17 @@ impl<TC: InCircleTest<Point = Vec2d>, TT: InTriangleTest, TO: TriangleOrientatio
         Ok(ti)
     }
 
-    /// ```text
-    ///  C    n4    B         C    n4    B
-    ///   ┌────────┐           ┌────────┐
-    ///   │       X│           │X       │
-    ///   │ t0   X │           │ X  t1  │
-    ///   │     X  │           │  X     │
-    /// n1│    X   │n3 ────► n1│   X    │n3
-    ///   │   X    │           │    X   │
-    ///   │  X     │           │     X  │
-    ///   │ X   t1 │           │ t0   X │
-    ///   │X       │           │       X│
-    ///   └────────┘           └────────┘
-    ///  A    n2    D         A    n2    D
-    ///  ```
-    pub fn flip_ab(&mut self, t0i: usize) {
-        let a;
-        let b;
-        let c; 
-        let d;
-        let n1;
-        let n2;
-        let n3;
-        let n4;
-        let t1i;
-        {
-            let t0 = &self.triangles[t0i];
-            t1i = t0.ab;
-            let t1 = &self.triangles[t1i];
-            n1 = t0.ca;
-            n4 = t0.bc;
-            a = t0.a;
-            b = t0.b;
-            c = t0.c;
-            if t1.ab == t0i {
-                d = t1.c;
-                n2 = t1.bc;
-                n3 = t1.ca;
-            } else if t1.bc == t0i {
-                d = t1.a;
-                n2 = t1.ca;
-                n3 = t1.ab;
-            } else {
-                debug_assert!(t1.ca == t0i);
-                d = t1.b;
-                n2 = t1.ab;
-                n3 = t1.bc;
-            };
-        }
-
-        {
-            let t0 = &mut self.triangles[t0i];
-            t0.a = a;
-            t0.b = d;
-            t0.c = c;
-            t0.ab = n2;
-            t0.bc = t1i;
-            t0.ca = n1;
-        }
-
-        {
-            let t1 = &mut self.triangles[t1i];
-            t1.a = d;
-            t1.b = b;
-            t1.c = c; 
-            t1.ab = n3;
-            t1.bc = n4;
-            t1.ca = t1i;
-        }
+    pub fn insert_on_triangle_ab(&mut self, _t: usize, _p: usize) {
+        panic!("Not implemented");
     }
 
-    pub fn insert_on_triangle_ab(&mut self, _t: usize, _p: usize) {}
+    pub fn insert_on_triangle_bc(&mut self, _t: usize, _p: usize) {
+        panic!("Not implemented");
+    }
 
-    pub fn insert_on_triangle_bc(&mut self, _t: usize, _p: usize) {}
-
-    pub fn insert_on_triangle_ca(&mut self, _t: usize, _p: usize) {}
+    pub fn insert_on_triangle_ca(&mut self, _t: usize, _p: usize) {
+        panic!("Not implemented");
+    }
 
     pub fn insert_in_triangle(&mut self, t: usize, p: usize) {
         // Get points setup on all triangles
@@ -236,10 +182,19 @@ impl<TC: InCircleTest<Point = Vec2d>, TT: InTriangleTest, TO: TriangleOrientatio
         swap_test_bc(self, t2);
         swap_test_ca(self, t3);
     }
+
+    pub fn rotate_triangle(&mut self, ti: usize) {
+        let t = self.triangles[ti].clone();
+        self.triangles[ti].a = t.b;
+        self.triangles[ti].b = t.c;
+        self.triangles[ti].c = t.a;
+        self.triangles[ti].ab = t.bc;
+        self.triangles[ti].bc = t.ca;
+        self.triangles[ti].ca = t.ab;
+    }
 }
 
 #[cfg(test)]
 mod unit_tests {
     use super::*;
-
 }

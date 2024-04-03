@@ -26,4 +26,5 @@ pub use in_triangle_simple::*;
 pub use orient_triangle::*;
 pub use orient_triangle_simple::*;
 
-pub type Simple2DMesh = DelaunayMesh2d<SimpleDetInCircle, InTriangleSimple, TriangleOrientationSimple>;
+pub type Simple2DMesh =
+    DelaunayMesh2d<SimpleDetInCircle, InTriangleSimple, TriangleOrientationSimple>;

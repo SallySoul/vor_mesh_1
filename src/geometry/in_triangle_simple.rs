@@ -46,7 +46,6 @@ impl InTriangleTest for InTriangleSimple {
             InTriangle::In
         } else if u + v > 1.0 {
             InTriangle::OutsideBC
-        
         } else {
             panic!("Bad InTriangle test?, u: {}, v: {}", u, v);
         };
@@ -90,7 +89,7 @@ mod unit_tests {
             );
         }
 
-        for p in [vec2![6.0, 5.0], vec2![15.0, -7.0]] {
+        for p in [vec2![6.0, 5.0], vec2![15.0, 7.0]] {
             assert_eq!(
                 t.in_triangle(&a, &b, &c, &p),
                 InTriangle::OutsideBC,

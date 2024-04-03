@@ -1,6 +1,10 @@
 use crate::geometry::*;
 
-pub fn opposite_point<TC, TT, TO>(mesh: &mut DelaunayMesh2d<TC, TT, TO>, t0i: usize, t1i: usize) -> usize
+pub fn opposite_point<TC, TT, TO>(
+    mesh: &mut DelaunayMesh2d<TC, TT, TO>,
+    t0i: usize,
+    t1i: usize,
+) -> usize
 where
     TC: InCircleTest<Point = Vec2d>,
     TT: InTriangleTest,
@@ -33,7 +37,6 @@ where
     }
 }
 
-
 pub fn swap_test_bc<TC, TT, TO>(mesh: &mut DelaunayMesh2d<TC, TT, TO>, ti: usize)
 where
     TC: InCircleTest<Point = Vec2d>,
@@ -47,7 +50,7 @@ where
         flip_bc(mesh, ti);
         swap_test_ab(mesh, ti);
         swap_test_ab(mesh, t1);
-    }   
+    }
 }
 
 pub fn swap_test_ca<TC, TT, TO>(mesh: &mut DelaunayMesh2d<TC, TT, TO>, ti: usize)
