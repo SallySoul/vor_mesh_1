@@ -161,23 +161,16 @@ where
 #[cfg(test)]
 mod unit_tests {
     use super::*;
+
+    // There are 9 basic flip tests,
+    // `flip_{ab, bc, ca}_{1, 2, 3}`.
+    // For every combinations of rotated t0, t1.
     //
-    // Recall the flip diagram
-    // ```text
-    //  C    n4    B         C    n4    B
-    //   ┌────────┐           ┌────────┐
-    //   │       X│           │X       │
-    //   │ t0   X │           │ X  t1  │
-    //   │     X  │           │  X     │
-    // n1│    X   │n3 ────► n1│   X    │n3
-    //   │   X    │           │    X   │
-    //   │  X     │           │     X  │
-    //   │ X   t1 │           │ t0   X │
-    //   │X       │           │       X│
-    //   └────────┘           └────────┘
-    //  A    n2    D         A    n2    D
-    //  ```
-    //  We want to test every rotation of t0 and t1
+    // In addition there are two `flip_ab_n2_*`
+    // that test the other n2 rotations
+    // from flip_ab_1 in order to fully test
+    // `swap_neighbor`
+
     #[test]
     fn flip_ab_1() {
         let mut m = Simple2DMesh::empty();
@@ -282,14 +275,1032 @@ mod unit_tests {
     }
 
     #[test]
-    fn flip_ab_2() {}
+    fn flip_ab_2() {
+        let mut m = Simple2DMesh::empty();
+        let a = m.add_point(vec2![0.0, 0.0]);
+        let b = m.add_point(vec2![1.0, 1.0]);
+        let c = m.add_point(vec2![0.0, 1.0]);
+        let d = m.add_point(vec2![1.0, 0.0]);
+        let n1p = m.add_point(vec2![-0.5, 0.5]);
+        let n2p = m.add_point(vec2![0.5, -0.5]);
+        let n3p = m.add_point(vec2![1.5, 0.5]);
+        let n4p = m.add_point(vec2![0.5, 1.5]);
+        let t0 = m.add_triangle(a, b, c);
+        let t1 = m.add_triangle(b, a, d);
+        let n1 = m.add_triangle(n1p, a, c);
+        let n2 = m.add_triangle(n2p, d, a);
+        let n3 = m.add_triangle(n3p, b, d);
+        let n4 = m.add_triangle(n4p, c, b);
+        m.set_triangle_neighbors(t0, t1, n4, n1);
+        m.set_triangle_neighbors(t1, t0, n2, n3);
+
+        // Add some fake neighbors for other triangles
+        let n1_1 = 20;
+        let n1_2 = 21;
+        m.set_triangle_neighbors(n1, n1_1, t0, n1_2);
+        let n2_1 = 22;
+        let n2_2 = 23;
+        m.set_triangle_neighbors(n2, n2_1, t1, n2_2);
+        let n3_1 = 24;
+        let n3_2 = 25;
+        m.set_triangle_neighbors(n3, n3_1, t1, n3_2);
+        let n4_1 = 26;
+        let n4_2 = 27;
+        m.set_triangle_neighbors(n4, n4_1, t0, n4_2);
+
+        flip_ab(&mut m, t0);
+        assert_eq!(
+            m.triangle(t0),
+            &Triangle {
+                a: a,
+                b: d,
+                c: c,
+                ab: n2,
+                bc: t1,
+                ca: n1
+            }
+        );
+        assert_eq!(
+            m.triangle(t1),
+            &Triangle {
+                a: d,
+                b: b,
+                c: c,
+                ab: n3,
+                bc: n4,
+                ca: t0,
+            }
+        );
+        assert_eq!(
+            m.triangle(n1),
+            &Triangle {
+                a: n1p,
+                b: a,
+                c: c,
+                ab: n1_1,
+                bc: t0,
+                ca: n1_2
+            }
+        );
+        assert_eq!(
+            m.triangle(n2),
+            &Triangle {
+                a: n2p,
+                b: d,
+                c: a,
+                ab: n2_1,
+                bc: t0,
+                ca: n2_2
+            }
+        );
+        assert_eq!(
+            m.triangle(n3),
+            &Triangle {
+                a: n3p,
+                b: b,
+                c: d,
+                ab: n3_1,
+                bc: t1,
+                ca: n3_2
+            }
+        );
+        assert_eq!(
+            m.triangle(n4),
+            &Triangle {
+                a: n4p,
+                b: c,
+                c: b,
+                ab: n4_1,
+                bc: t1,
+                ca: n4_2
+            }
+        );
+    }
 
     #[test]
-    fn flip_ab_3() {}
+    fn flip_ab_3() {
+        let mut m = Simple2DMesh::empty();
+        let a = m.add_point(vec2![0.0, 0.0]);
+        let b = m.add_point(vec2![1.0, 1.0]);
+        let c = m.add_point(vec2![0.0, 1.0]);
+        let d = m.add_point(vec2![1.0, 0.0]);
+        let n1p = m.add_point(vec2![-0.5, 0.5]);
+        let n2p = m.add_point(vec2![0.5, -0.5]);
+        let n3p = m.add_point(vec2![1.5, 0.5]);
+        let n4p = m.add_point(vec2![0.5, 1.5]);
+        let t0 = m.add_triangle(a, b, c);
+        let t1 = m.add_triangle(a, d, b);
+        let n1 = m.add_triangle(n1p, a, c);
+        let n2 = m.add_triangle(n2p, d, a);
+        let n3 = m.add_triangle(n3p, b, d);
+        let n4 = m.add_triangle(n4p, c, b);
+        m.set_triangle_neighbors(t0, t1, n4, n1);
+        m.set_triangle_neighbors(t1, n2, n3, t0);
+
+        // Add some fake neighbors for other triangles
+        let n1_1 = 20;
+        let n1_2 = 21;
+        m.set_triangle_neighbors(n1, n1_1, t0, n1_2);
+        let n2_1 = 22;
+        let n2_2 = 23;
+        m.set_triangle_neighbors(n2, n2_1, t1, n2_2);
+        let n3_1 = 24;
+        let n3_2 = 25;
+        m.set_triangle_neighbors(n3, n3_1, t1, n3_2);
+        let n4_1 = 26;
+        let n4_2 = 27;
+        m.set_triangle_neighbors(n4, n4_1, t0, n4_2);
+
+        flip_ab(&mut m, t0);
+        assert_eq!(
+            m.triangle(t0),
+            &Triangle {
+                a: a,
+                b: d,
+                c: c,
+                ab: n2,
+                bc: t1,
+                ca: n1
+            }
+        );
+        assert_eq!(
+            m.triangle(t1),
+            &Triangle {
+                a: d,
+                b: b,
+                c: c,
+                ab: n3,
+                bc: n4,
+                ca: t0,
+            }
+        );
+        assert_eq!(
+            m.triangle(n1),
+            &Triangle {
+                a: n1p,
+                b: a,
+                c: c,
+                ab: n1_1,
+                bc: t0,
+                ca: n1_2
+            }
+        );
+        assert_eq!(
+            m.triangle(n2),
+            &Triangle {
+                a: n2p,
+                b: d,
+                c: a,
+                ab: n2_1,
+                bc: t0,
+                ca: n2_2
+            }
+        );
+        assert_eq!(
+            m.triangle(n3),
+            &Triangle {
+                a: n3p,
+                b: b,
+                c: d,
+                ab: n3_1,
+                bc: t1,
+                ca: n3_2
+            }
+        );
+        assert_eq!(
+            m.triangle(n4),
+            &Triangle {
+                a: n4p,
+                b: c,
+                c: b,
+                ab: n4_1,
+                bc: t1,
+                ca: n4_2
+            }
+        );
+    }
 
     #[test]
-    fn flip_bc() {}
+    fn flip_bc_1() {
+        let mut m = Simple2DMesh::empty();
+        let a = m.add_point(vec2![0.0, 0.0]);
+        let b = m.add_point(vec2![1.0, 1.0]);
+        let c = m.add_point(vec2![0.0, 1.0]);
+        let d = m.add_point(vec2![1.0, 0.0]);
+        let n1p = m.add_point(vec2![-0.5, 0.5]);
+        let n2p = m.add_point(vec2![0.5, -0.5]);
+        let n3p = m.add_point(vec2![1.5, 0.5]);
+        let n4p = m.add_point(vec2![0.5, 1.5]);
+        let t0 = m.add_triangle(c, a, b);
+        let t1 = m.add_triangle(d, b, a);
+        let n1 = m.add_triangle(n1p, a, c);
+        let n2 = m.add_triangle(n2p, d, a);
+        let n3 = m.add_triangle(n3p, b, d);
+        let n4 = m.add_triangle(n4p, c, b);
+        m.set_triangle_neighbors(t0, n1, t1, n4);
+        m.set_triangle_neighbors(t1, n3, t0, n2);
+
+        // Add some fake neighbors for other triangles
+        let n1_1 = 20;
+        let n1_2 = 21;
+        m.set_triangle_neighbors(n1, n1_1, t0, n1_2);
+        let n2_1 = 22;
+        let n2_2 = 23;
+        m.set_triangle_neighbors(n2, n2_1, t1, n2_2);
+        let n3_1 = 24;
+        let n3_2 = 25;
+        m.set_triangle_neighbors(n3, n3_1, t1, n3_2);
+        let n4_1 = 26;
+        let n4_2 = 27;
+        m.set_triangle_neighbors(n4, n4_1, t0, n4_2);
+
+        flip_bc(&mut m, t0);
+        assert_eq!(
+            m.triangle(t0),
+            &Triangle {
+                a: a,
+                b: d,
+                c: c,
+                ab: n2,
+                bc: t1,
+                ca: n1
+            }
+        );
+        assert_eq!(
+            m.triangle(t1),
+            &Triangle {
+                a: d,
+                b: b,
+                c: c,
+                ab: n3,
+                bc: n4,
+                ca: t0,
+            }
+        );
+        assert_eq!(
+            m.triangle(n1),
+            &Triangle {
+                a: n1p,
+                b: a,
+                c: c,
+                ab: n1_1,
+                bc: t0,
+                ca: n1_2
+            }
+        );
+        assert_eq!(
+            m.triangle(n2),
+            &Triangle {
+                a: n2p,
+                b: d,
+                c: a,
+                ab: n2_1,
+                bc: t0,
+                ca: n2_2
+            }
+        );
+        assert_eq!(
+            m.triangle(n3),
+            &Triangle {
+                a: n3p,
+                b: b,
+                c: d,
+                ab: n3_1,
+                bc: t1,
+                ca: n3_2
+            }
+        );
+        assert_eq!(
+            m.triangle(n4),
+            &Triangle {
+                a: n4p,
+                b: c,
+                c: b,
+                ab: n4_1,
+                bc: t1,
+                ca: n4_2
+            }
+        );
+    }
 
     #[test]
-    fn flip_ca() {}
+    fn flip_bc_2() {
+        let mut m = Simple2DMesh::empty();
+        let a = m.add_point(vec2![0.0, 0.0]);
+        let b = m.add_point(vec2![1.0, 1.0]);
+        let c = m.add_point(vec2![0.0, 1.0]);
+        let d = m.add_point(vec2![1.0, 0.0]);
+        let n1p = m.add_point(vec2![-0.5, 0.5]);
+        let n2p = m.add_point(vec2![0.5, -0.5]);
+        let n3p = m.add_point(vec2![1.5, 0.5]);
+        let n4p = m.add_point(vec2![0.5, 1.5]);
+        let t0 = m.add_triangle(c, a, b);
+        let t1 = m.add_triangle(b, a, d);
+        let n1 = m.add_triangle(n1p, a, c);
+        let n2 = m.add_triangle(n2p, d, a);
+        let n3 = m.add_triangle(n3p, b, d);
+        let n4 = m.add_triangle(n4p, c, b);
+        m.set_triangle_neighbors(t0, n1, t1, n4);
+        m.set_triangle_neighbors(t1, t0, n2, n3);
+
+        // Add some fake neighbors for other triangles
+        let n1_1 = 20;
+        let n1_2 = 21;
+        m.set_triangle_neighbors(n1, n1_1, t0, n1_2);
+        let n2_1 = 22;
+        let n2_2 = 23;
+        m.set_triangle_neighbors(n2, n2_1, t1, n2_2);
+        let n3_1 = 24;
+        let n3_2 = 25;
+        m.set_triangle_neighbors(n3, n3_1, t1, n3_2);
+        let n4_1 = 26;
+        let n4_2 = 27;
+        m.set_triangle_neighbors(n4, n4_1, t0, n4_2);
+
+        flip_bc(&mut m, t0);
+        assert_eq!(
+            m.triangle(t0),
+            &Triangle {
+                a: a,
+                b: d,
+                c: c,
+                ab: n2,
+                bc: t1,
+                ca: n1
+            }
+        );
+        assert_eq!(
+            m.triangle(t1),
+            &Triangle {
+                a: d,
+                b: b,
+                c: c,
+                ab: n3,
+                bc: n4,
+                ca: t0,
+            }
+        );
+        assert_eq!(
+            m.triangle(n1),
+            &Triangle {
+                a: n1p,
+                b: a,
+                c: c,
+                ab: n1_1,
+                bc: t0,
+                ca: n1_2
+            }
+        );
+        assert_eq!(
+            m.triangle(n2),
+            &Triangle {
+                a: n2p,
+                b: d,
+                c: a,
+                ab: n2_1,
+                bc: t0,
+                ca: n2_2
+            }
+        );
+        assert_eq!(
+            m.triangle(n3),
+            &Triangle {
+                a: n3p,
+                b: b,
+                c: d,
+                ab: n3_1,
+                bc: t1,
+                ca: n3_2
+            }
+        );
+        assert_eq!(
+            m.triangle(n4),
+            &Triangle {
+                a: n4p,
+                b: c,
+                c: b,
+                ab: n4_1,
+                bc: t1,
+                ca: n4_2
+            }
+        );
+    }
+
+    #[test]
+    fn flip_bc_3() {
+        let mut m = Simple2DMesh::empty();
+        let a = m.add_point(vec2![0.0, 0.0]);
+        let b = m.add_point(vec2![1.0, 1.0]);
+        let c = m.add_point(vec2![0.0, 1.0]);
+        let d = m.add_point(vec2![1.0, 0.0]);
+        let n1p = m.add_point(vec2![-0.5, 0.5]);
+        let n2p = m.add_point(vec2![0.5, -0.5]);
+        let n3p = m.add_point(vec2![1.5, 0.5]);
+        let n4p = m.add_point(vec2![0.5, 1.5]);
+        let t0 = m.add_triangle(c, a, b);
+        let t1 = m.add_triangle(a, d, b);
+        let n1 = m.add_triangle(n1p, a, c);
+        let n2 = m.add_triangle(n2p, d, a);
+        let n3 = m.add_triangle(n3p, b, d);
+        let n4 = m.add_triangle(n4p, c, b);
+        m.set_triangle_neighbors(t0, n1, t1, n4);
+        m.set_triangle_neighbors(t1, n2, n3, t0);
+
+        // Add some fake neighbors for other triangles
+        let n1_1 = 20;
+        let n1_2 = 21;
+        m.set_triangle_neighbors(n1, n1_1, t0, n1_2);
+        let n2_1 = 22;
+        let n2_2 = 23;
+        m.set_triangle_neighbors(n2, n2_1, t1, n2_2);
+        let n3_1 = 24;
+        let n3_2 = 25;
+        m.set_triangle_neighbors(n3, n3_1, t1, n3_2);
+        let n4_1 = 26;
+        let n4_2 = 27;
+        m.set_triangle_neighbors(n4, n4_1, t0, n4_2);
+
+        flip_bc(&mut m, t0);
+        assert_eq!(
+            m.triangle(t0),
+            &Triangle {
+                a: a,
+                b: d,
+                c: c,
+                ab: n2,
+                bc: t1,
+                ca: n1
+            }
+        );
+        assert_eq!(
+            m.triangle(t1),
+            &Triangle {
+                a: d,
+                b: b,
+                c: c,
+                ab: n3,
+                bc: n4,
+                ca: t0,
+            }
+        );
+        assert_eq!(
+            m.triangle(n1),
+            &Triangle {
+                a: n1p,
+                b: a,
+                c: c,
+                ab: n1_1,
+                bc: t0,
+                ca: n1_2
+            }
+        );
+        assert_eq!(
+            m.triangle(n2),
+            &Triangle {
+                a: n2p,
+                b: d,
+                c: a,
+                ab: n2_1,
+                bc: t0,
+                ca: n2_2
+            }
+        );
+        assert_eq!(
+            m.triangle(n3),
+            &Triangle {
+                a: n3p,
+                b: b,
+                c: d,
+                ab: n3_1,
+                bc: t1,
+                ca: n3_2
+            }
+        );
+        assert_eq!(
+            m.triangle(n4),
+            &Triangle {
+                a: n4p,
+                b: c,
+                c: b,
+                ab: n4_1,
+                bc: t1,
+                ca: n4_2
+            }
+        );
+    }
+
+    #[test]
+    fn flip_ca_1() {
+        let mut m = Simple2DMesh::empty();
+        let a = m.add_point(vec2![0.0, 0.0]);
+        let b = m.add_point(vec2![1.0, 1.0]);
+        let c = m.add_point(vec2![0.0, 1.0]);
+        let d = m.add_point(vec2![1.0, 0.0]);
+        let n1p = m.add_point(vec2![-0.5, 0.5]);
+        let n2p = m.add_point(vec2![0.5, -0.5]);
+        let n3p = m.add_point(vec2![1.5, 0.5]);
+        let n4p = m.add_point(vec2![0.5, 1.5]);
+        let t0 = m.add_triangle(b, c, a);
+        let t1 = m.add_triangle(d, b, a);
+        let n1 = m.add_triangle(n1p, a, c);
+        let n2 = m.add_triangle(n2p, d, a);
+        let n3 = m.add_triangle(n3p, b, d);
+        let n4 = m.add_triangle(n4p, c, b);
+        m.set_triangle_neighbors(t0, n4, n1, t1);
+        m.set_triangle_neighbors(t1, n3, t0, n2);
+
+        // Add some fake neighbors for other triangles
+        let n1_1 = 20;
+        let n1_2 = 21;
+        m.set_triangle_neighbors(n1, n1_1, t0, n1_2);
+        let n2_1 = 22;
+        let n2_2 = 23;
+        m.set_triangle_neighbors(n2, n2_1, t1, n2_2);
+        let n3_1 = 24;
+        let n3_2 = 25;
+        m.set_triangle_neighbors(n3, n3_1, t1, n3_2);
+        let n4_1 = 26;
+        let n4_2 = 27;
+        m.set_triangle_neighbors(n4, n4_1, t0, n4_2);
+
+        flip_ca(&mut m, t0);
+        assert_eq!(
+            m.triangle(t0),
+            &Triangle {
+                a: a,
+                b: d,
+                c: c,
+                ab: n2,
+                bc: t1,
+                ca: n1
+            }
+        );
+        assert_eq!(
+            m.triangle(t1),
+            &Triangle {
+                a: d,
+                b: b,
+                c: c,
+                ab: n3,
+                bc: n4,
+                ca: t0,
+            }
+        );
+        assert_eq!(
+            m.triangle(n1),
+            &Triangle {
+                a: n1p,
+                b: a,
+                c: c,
+                ab: n1_1,
+                bc: t0,
+                ca: n1_2
+            }
+        );
+        assert_eq!(
+            m.triangle(n2),
+            &Triangle {
+                a: n2p,
+                b: d,
+                c: a,
+                ab: n2_1,
+                bc: t0,
+                ca: n2_2
+            }
+        );
+        assert_eq!(
+            m.triangle(n3),
+            &Triangle {
+                a: n3p,
+                b: b,
+                c: d,
+                ab: n3_1,
+                bc: t1,
+                ca: n3_2
+            }
+        );
+        assert_eq!(
+            m.triangle(n4),
+            &Triangle {
+                a: n4p,
+                b: c,
+                c: b,
+                ab: n4_1,
+                bc: t1,
+                ca: n4_2
+            }
+        );
+    }
+
+    #[test]
+    fn flip_ca_2() {
+        let mut m = Simple2DMesh::empty();
+        let a = m.add_point(vec2![0.0, 0.0]);
+        let b = m.add_point(vec2![1.0, 1.0]);
+        let c = m.add_point(vec2![0.0, 1.0]);
+        let d = m.add_point(vec2![1.0, 0.0]);
+        let n1p = m.add_point(vec2![-0.5, 0.5]);
+        let n2p = m.add_point(vec2![0.5, -0.5]);
+        let n3p = m.add_point(vec2![1.5, 0.5]);
+        let n4p = m.add_point(vec2![0.5, 1.5]);
+        let t0 = m.add_triangle(b, c, a);
+        let t1 = m.add_triangle(b, a, d);
+        let n1 = m.add_triangle(n1p, a, c);
+        let n2 = m.add_triangle(n2p, d, a);
+        let n3 = m.add_triangle(n3p, b, d);
+        let n4 = m.add_triangle(n4p, c, b);
+        m.set_triangle_neighbors(t0, n4, n1, t1);
+        m.set_triangle_neighbors(t1, t0, n2, n3);
+
+        // Add some fake neighbors for other triangles
+        let n1_1 = 20;
+        let n1_2 = 21;
+        m.set_triangle_neighbors(n1, n1_1, t0, n1_2);
+        let n2_1 = 22;
+        let n2_2 = 23;
+        m.set_triangle_neighbors(n2, n2_1, t1, n2_2);
+        let n3_1 = 24;
+        let n3_2 = 25;
+        m.set_triangle_neighbors(n3, n3_1, t1, n3_2);
+        let n4_1 = 26;
+        let n4_2 = 27;
+        m.set_triangle_neighbors(n4, n4_1, t0, n4_2);
+
+        flip_ca(&mut m, t0);
+        assert_eq!(
+            m.triangle(t0),
+            &Triangle {
+                a: a,
+                b: d,
+                c: c,
+                ab: n2,
+                bc: t1,
+                ca: n1
+            }
+        );
+        assert_eq!(
+            m.triangle(t1),
+            &Triangle {
+                a: d,
+                b: b,
+                c: c,
+                ab: n3,
+                bc: n4,
+                ca: t0,
+            }
+        );
+        assert_eq!(
+            m.triangle(n1),
+            &Triangle {
+                a: n1p,
+                b: a,
+                c: c,
+                ab: n1_1,
+                bc: t0,
+                ca: n1_2
+            }
+        );
+        assert_eq!(
+            m.triangle(n2),
+            &Triangle {
+                a: n2p,
+                b: d,
+                c: a,
+                ab: n2_1,
+                bc: t0,
+                ca: n2_2
+            }
+        );
+        assert_eq!(
+            m.triangle(n3),
+            &Triangle {
+                a: n3p,
+                b: b,
+                c: d,
+                ab: n3_1,
+                bc: t1,
+                ca: n3_2
+            }
+        );
+        assert_eq!(
+            m.triangle(n4),
+            &Triangle {
+                a: n4p,
+                b: c,
+                c: b,
+                ab: n4_1,
+                bc: t1,
+                ca: n4_2
+            }
+        );
+    }
+
+    #[test]
+    fn flip_ca_3() {
+        let mut m = Simple2DMesh::empty();
+        let a = m.add_point(vec2![0.0, 0.0]);
+        let b = m.add_point(vec2![1.0, 1.0]);
+        let c = m.add_point(vec2![0.0, 1.0]);
+        let d = m.add_point(vec2![1.0, 0.0]);
+        let n1p = m.add_point(vec2![-0.5, 0.5]);
+        let n2p = m.add_point(vec2![0.5, -0.5]);
+        let n3p = m.add_point(vec2![1.5, 0.5]);
+        let n4p = m.add_point(vec2![0.5, 1.5]);
+        let t0 = m.add_triangle(b, c, a);
+        let t1 = m.add_triangle(a, d, b);
+        let n1 = m.add_triangle(n1p, a, c);
+        let n2 = m.add_triangle(n2p, d, a);
+        let n3 = m.add_triangle(n3p, b, d);
+        let n4 = m.add_triangle(n4p, c, b);
+        m.set_triangle_neighbors(t0, n4, n1, t1);
+        m.set_triangle_neighbors(t1, n2, n3, t0);
+
+        // Add some fake neighbors for other triangles
+        let n1_1 = 20;
+        let n1_2 = 21;
+        m.set_triangle_neighbors(n1, n1_1, t0, n1_2);
+        let n2_1 = 22;
+        let n2_2 = 23;
+        m.set_triangle_neighbors(n2, n2_1, t1, n2_2);
+        let n3_1 = 24;
+        let n3_2 = 25;
+        m.set_triangle_neighbors(n3, n3_1, t1, n3_2);
+        let n4_1 = 26;
+        let n4_2 = 27;
+        m.set_triangle_neighbors(n4, n4_1, t0, n4_2);
+
+        flip_ca(&mut m, t0);
+        assert_eq!(
+            m.triangle(t0),
+            &Triangle {
+                a: a,
+                b: d,
+                c: c,
+                ab: n2,
+                bc: t1,
+                ca: n1
+            }
+        );
+        assert_eq!(
+            m.triangle(t1),
+            &Triangle {
+                a: d,
+                b: b,
+                c: c,
+                ab: n3,
+                bc: n4,
+                ca: t0,
+            }
+        );
+        assert_eq!(
+            m.triangle(n1),
+            &Triangle {
+                a: n1p,
+                b: a,
+                c: c,
+                ab: n1_1,
+                bc: t0,
+                ca: n1_2
+            }
+        );
+        assert_eq!(
+            m.triangle(n2),
+            &Triangle {
+                a: n2p,
+                b: d,
+                c: a,
+                ab: n2_1,
+                bc: t0,
+                ca: n2_2
+            }
+        );
+        assert_eq!(
+            m.triangle(n3),
+            &Triangle {
+                a: n3p,
+                b: b,
+                c: d,
+                ab: n3_1,
+                bc: t1,
+                ca: n3_2
+            }
+        );
+        assert_eq!(
+            m.triangle(n4),
+            &Triangle {
+                a: n4p,
+                b: c,
+                c: b,
+                ab: n4_1,
+                bc: t1,
+                ca: n4_2
+            }
+        );
+    }
+
+    #[test]
+    fn flip_ab_n2_1() {
+        let mut m = Simple2DMesh::empty();
+        let a = m.add_point(vec2![0.0, 0.0]);
+        let b = m.add_point(vec2![1.0, 1.0]);
+        let c = m.add_point(vec2![0.0, 1.0]);
+        let d = m.add_point(vec2![1.0, 0.0]);
+        let n1p = m.add_point(vec2![-0.5, 0.5]);
+        let n2p = m.add_point(vec2![0.5, -0.5]);
+        let n3p = m.add_point(vec2![1.5, 0.5]);
+        let n4p = m.add_point(vec2![0.5, 1.5]);
+        let t0 = m.add_triangle(a, b, c);
+        let t1 = m.add_triangle(d, b, a);
+        let n1 = m.add_triangle(n1p, a, c);
+        let n2 = m.add_triangle(d, a, n2p);
+        let n3 = m.add_triangle(n3p, b, d);
+        let n4 = m.add_triangle(n4p, c, b);
+        m.set_triangle_neighbors(t0, t1, n4, n1);
+        m.set_triangle_neighbors(t1, n3, t0, n2);
+
+        // Add some fake neighbors for other triangles
+        let n1_1 = 20;
+        let n1_2 = 21;
+        m.set_triangle_neighbors(n1, n1_1, t0, n1_2);
+        let n2_1 = 22;
+        let n2_2 = 23;
+        m.set_triangle_neighbors(n2, t1, n2_2, n2_1);
+        let n3_1 = 24;
+        let n3_2 = 25;
+        m.set_triangle_neighbors(n3, n3_1, t1, n3_2);
+        let n4_1 = 26;
+        let n4_2 = 27;
+        m.set_triangle_neighbors(n4, n4_1, t0, n4_2);
+
+        flip_ab(&mut m, t0);
+        assert_eq!(
+            m.triangle(t0),
+            &Triangle {
+                a: a,
+                b: d,
+                c: c,
+                ab: n2,
+                bc: t1,
+                ca: n1
+            }
+        );
+        assert_eq!(
+            m.triangle(t1),
+            &Triangle {
+                a: d,
+                b: b,
+                c: c,
+                ab: n3,
+                bc: n4,
+                ca: t0,
+            }
+        );
+        assert_eq!(
+            m.triangle(n1),
+            &Triangle {
+                a: n1p,
+                b: a,
+                c: c,
+                ab: n1_1,
+                bc: t0,
+                ca: n1_2
+            }
+        );
+        assert_eq!(
+            m.triangle(n2),
+            &Triangle {
+                a: d,
+                b: a,
+                c: n2p,
+                ab: t0,
+                bc: n2_2,
+                ca: n2_1
+            }
+        );
+        assert_eq!(
+            m.triangle(n3),
+            &Triangle {
+                a: n3p,
+                b: b,
+                c: d,
+                ab: n3_1,
+                bc: t1,
+                ca: n3_2
+            }
+        );
+        assert_eq!(
+            m.triangle(n4),
+            &Triangle {
+                a: n4p,
+                b: c,
+                c: b,
+                ab: n4_1,
+                bc: t1,
+                ca: n4_2
+            }
+        );
+    }
+
+    #[test]
+    fn flip_ab_n2_2() {
+        let mut m = Simple2DMesh::empty();
+        let a = m.add_point(vec2![0.0, 0.0]);
+        let b = m.add_point(vec2![1.0, 1.0]);
+        let c = m.add_point(vec2![0.0, 1.0]);
+        let d = m.add_point(vec2![1.0, 0.0]);
+        let n1p = m.add_point(vec2![-0.5, 0.5]);
+        let n2p = m.add_point(vec2![0.5, -0.5]);
+        let n3p = m.add_point(vec2![1.5, 0.5]);
+        let n4p = m.add_point(vec2![0.5, 1.5]);
+        let t0 = m.add_triangle(a, b, c);
+        let t1 = m.add_triangle(d, b, a);
+        let n1 = m.add_triangle(n1p, a, c);
+        let n2 = m.add_triangle(a, n2p, d);
+        let n3 = m.add_triangle(n3p, b, d);
+        let n4 = m.add_triangle(n4p, c, b);
+        m.set_triangle_neighbors(t0, t1, n4, n1);
+        m.set_triangle_neighbors(t1, n3, t0, n2);
+
+        // Add some fake neighbors for other triangles
+        let n1_1 = 20;
+        let n1_2 = 21;
+        m.set_triangle_neighbors(n1, n1_1, t0, n1_2);
+        let n2_1 = 22;
+        let n2_2 = 23;
+        m.set_triangle_neighbors(n2, n2_2, n2_1, t1);
+        let n3_1 = 24;
+        let n3_2 = 25;
+        m.set_triangle_neighbors(n3, n3_1, t1, n3_2);
+        let n4_1 = 26;
+        let n4_2 = 27;
+        m.set_triangle_neighbors(n4, n4_1, t0, n4_2);
+
+        flip_ab(&mut m, t0);
+        assert_eq!(
+            m.triangle(t0),
+            &Triangle {
+                a: a,
+                b: d,
+                c: c,
+                ab: n2,
+                bc: t1,
+                ca: n1
+            }
+        );
+        assert_eq!(
+            m.triangle(t1),
+            &Triangle {
+                a: d,
+                b: b,
+                c: c,
+                ab: n3,
+                bc: n4,
+                ca: t0,
+            }
+        );
+        assert_eq!(
+            m.triangle(n1),
+            &Triangle {
+                a: n1p,
+                b: a,
+                c: c,
+                ab: n1_1,
+                bc: t0,
+                ca: n1_2
+            }
+        );
+        assert_eq!(
+            m.triangle(n2),
+            &Triangle {
+                a: a,
+                b: n2p,
+                c: d,
+                ab: n2_2,
+                bc: n2_1,
+                ca: t0
+            }
+        );
+        assert_eq!(
+            m.triangle(n3),
+            &Triangle {
+                a: n3p,
+                b: b,
+                c: d,
+                ab: n3_1,
+                bc: t1,
+                ca: n3_2
+            }
+        );
+        assert_eq!(
+            m.triangle(n4),
+            &Triangle {
+                a: n4p,
+                b: c,
+                c: b,
+                ab: n4_1,
+                bc: t1,
+                ca: n4_2
+            }
+        );
+    }
 }
