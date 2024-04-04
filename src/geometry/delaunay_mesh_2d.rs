@@ -40,8 +40,8 @@ impl<TC: InCircleTest<Point = Vec2d>, TT: InTriangleTest, TO: TriangleOrientatio
             ic_test: TC::new(),
             it_test: TT::new(),
             ot_test: TO::new(),
-            points: vec![a, b, c],
-            triangles: vec![Triangle::new(0, 1, 2)],
+            points: vec![vec2![std::f64::NAN, std::f64::NAN], a, b, c],
+            triangles: vec![Triangle::new(0, 0, 0), Triangle::new(1, 2, 3)],
         }
     }
 
@@ -71,8 +71,14 @@ impl<TC: InCircleTest<Point = Vec2d>, TT: InTriangleTest, TO: TriangleOrientatio
         i
     }
 
+    /// Get a reference to Triangle `ti`.
     pub fn triangle(&self, ti: usize) -> &Triangle {
         &self.triangles[ti]
+    }
+
+    /// Get a mutable reference to Triangle `ti`
+    pub fn mut_triangle(&mut self, ti: usize) -> &mut Triangle {
+        &mut self.triangles[ti]
     }
 
     #[track_caller]
@@ -161,30 +167,37 @@ impl<TC: InCircleTest<Point = Vec2d>, TT: InTriangleTest, TO: TriangleOrientatio
 
     pub fn insert_in_triangle(&mut self, t: usize, p: usize) {
         // Get points setup on all triangles
-        let t0 = self.triangles[t];
+        let a = self.triangles[t].a;
+        let b = self.triangles[t].b;
+        let c = self.triangles[t].c;
+        let n2 = self.triangles[t].bc;
+        let n3 = self.triangles[t].ca;
+
+        // Update triangle vertices
         self.triangles[t].c = p;
-        let t2 = self.add_triangle(p, t0.b, t0.c);
-        let t3 = self.add_triangle(t0.a, p, t0.c);
+        let t1 = self.add_triangle(p, b, c);
+        let t2 = self.add_triangle(a, p, c);
 
         // Setup neighbors
-        self.triangles[t].bc = t2;
-        self.triangles[t].ca = t3;
-
+        self.triangles[t].bc = t1;
+        self.triangles[t].ca = t2;
+        self.triangles[t1].ab = t;
+        self.triangles[t1].bc = n2;
+        self.triangles[t1].ca = t2;
+        swap_neighbor(self, n2, t, t1);
         self.triangles[t2].ab = t;
-        self.triangles[t2].bc = t0.bc;
-        self.triangles[t2].ca = t3;
+        self.triangles[t2].bc = t1;
+        self.triangles[t2].ca = n3;
+        swap_neighbor(self, n3, t, t2);
 
-        self.triangles[t3].ab = t;
-        self.triangles[t3].bc = t2;
-        self.triangles[t3].ca = t0.ca;
-
+        // Perform swap tests
         swap_test_ab(self, t);
-        swap_test_bc(self, t2);
-        swap_test_ca(self, t3);
+        swap_test_bc(self, t1);
+        swap_test_ca(self, t2);
     }
 
     pub fn rotate_triangle(&mut self, ti: usize) {
-        let t = self.triangles[ti].clone();
+        let t = self.triangles[ti];
         self.triangles[ti].a = t.b;
         self.triangles[ti].b = t.c;
         self.triangles[ti].c = t.a;
@@ -192,9 +205,4 @@ impl<TC: InCircleTest<Point = Vec2d>, TT: InTriangleTest, TO: TriangleOrientatio
         self.triangles[ti].bc = t.ca;
         self.triangles[ti].ca = t.ab;
     }
-}
-
-#[cfg(test)]
-mod unit_tests {
-    use super::*;
 }

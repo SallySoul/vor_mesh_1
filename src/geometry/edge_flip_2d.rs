@@ -60,6 +60,11 @@ pub fn swap_neighbor<TC, TT, TO>(
     TT: InTriangleTest,
     TO: TriangleOrientationTest,
 {
+    // Don't swap neighbors for triangle 0
+    if ni == 0 {
+        return;
+    }
+
     let n = &mut mesh.triangles[ni];
     if n.ab == t0 {
         n.ab = t1;
@@ -209,9 +214,9 @@ mod unit_tests {
         assert_eq!(
             m.triangle(t0),
             &Triangle {
-                a: a,
+                a,
                 b: d,
-                c: c,
+                c,
                 ab: n2,
                 bc: t1,
                 ca: n1
@@ -221,8 +226,8 @@ mod unit_tests {
             m.triangle(t1),
             &Triangle {
                 a: d,
-                b: b,
-                c: c,
+                b,
+                c,
                 ab: n3,
                 bc: n4,
                 ca: t0,
@@ -233,7 +238,7 @@ mod unit_tests {
             &Triangle {
                 a: n1p,
                 b: a,
-                c: c,
+                c,
                 ab: n1_1,
                 bc: t0,
                 ca: n1_2
@@ -254,7 +259,7 @@ mod unit_tests {
             m.triangle(n3),
             &Triangle {
                 a: n3p,
-                b: b,
+                b,
                 c: d,
                 ab: n3_1,
                 bc: t1,
@@ -312,9 +317,9 @@ mod unit_tests {
         assert_eq!(
             m.triangle(t0),
             &Triangle {
-                a: a,
+                a,
                 b: d,
-                c: c,
+                c,
                 ab: n2,
                 bc: t1,
                 ca: n1
@@ -324,8 +329,8 @@ mod unit_tests {
             m.triangle(t1),
             &Triangle {
                 a: d,
-                b: b,
-                c: c,
+                b,
+                c,
                 ab: n3,
                 bc: n4,
                 ca: t0,
@@ -336,7 +341,7 @@ mod unit_tests {
             &Triangle {
                 a: n1p,
                 b: a,
-                c: c,
+                c,
                 ab: n1_1,
                 bc: t0,
                 ca: n1_2

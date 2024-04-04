@@ -33,7 +33,7 @@ impl InTriangleTest for InTriangleSimple {
         let inv_denom = 1.0 / (dot00 * dot11 - dot01 * dot01);
         let u = (dot11 * dot02 - dot01 * dot12) * inv_denom;
         let v = (dot00 * dot12 - dot01 * dot02) * inv_denom;
-        let result = if approx_zero(u) && approx_zero(v) {
+        if approx_zero(u) && approx_zero(v) {
             InTriangle::OnA
         } else if approx_one(u) && approx_zero(v) {
             InTriangle::OnC
@@ -54,9 +54,7 @@ impl InTriangleTest for InTriangleSimple {
         } else {
             debug_assert!(u + v > 1.0);
             InTriangle::OutsideBC
-        };
-
-        result
+        }
     }
 }
 
@@ -104,7 +102,7 @@ mod unit_tests {
             assert_eq!(t.in_triangle(&a, &b, &c, &p), InTriangle::OnBC);
         }
 
-        for p in [vec2![2.0, 4.0 / 3.0]] {
+        for p in [vec2![3.0, 8.0 / 3.0], vec2![2.0, 4.0 / 3.0]] {
             assert_eq!(t.in_triangle(&a, &b, &c, &p), InTriangle::OnCA);
         }
     }
@@ -127,24 +125,15 @@ mod unit_tests {
         }
 
         for p in [vec2![0.0, -4.0], vec2![-1.9, -3.4]] {
-            assert_eq!(
-                t.in_triangle(&a, &b, &c, &p),
-                InTriangle::OutsideAB
-            );
+            assert_eq!(t.in_triangle(&a, &b, &c, &p), InTriangle::OutsideAB);
         }
 
         for p in [vec2![3.0, 1.0], vec2![2.0, 2.0]] {
-            assert_eq!(
-                t.in_triangle(&a, &b, &c, &p),
-                InTriangle::OutsideBC
-            );
+            assert_eq!(t.in_triangle(&a, &b, &c, &p), InTriangle::OutsideBC);
         }
 
         for p in [vec2![-1.0, 1.0], vec2![-4.0, -2.0]] {
-            assert_eq!(
-                t.in_triangle(&a, &b, &c, &p),
-                InTriangle::OutsideCA
-            );
+            assert_eq!(t.in_triangle(&a, &b, &c, &p), InTriangle::OutsideCA);
         }
     }
 }
