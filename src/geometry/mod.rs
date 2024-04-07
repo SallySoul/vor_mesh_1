@@ -1,8 +1,10 @@
 mod delaunay_mesh_2d;
+mod delaunay_mesh_2d_hdf5;
 mod delaunay_mesh_2d_vtk;
 mod edge_flip_2d;
 mod swap_test_2d;
 mod triangle;
+mod voronoi_diagram_2d;
 
 mod geom_types;
 mod in_circle;
@@ -13,10 +15,12 @@ mod orient_triangle;
 mod orient_triangle_simple;
 
 pub use delaunay_mesh_2d::*;
+pub use delaunay_mesh_2d_hdf5::*;
 pub use delaunay_mesh_2d_vtk::*;
 pub use edge_flip_2d::*;
 pub use swap_test_2d::*;
 pub use triangle::*;
+pub use voronoi_diagram_2d::*;
 
 pub use geom_types::*;
 pub use in_circle::*;

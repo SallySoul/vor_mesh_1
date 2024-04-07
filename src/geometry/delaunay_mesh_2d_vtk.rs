@@ -11,6 +11,7 @@ pub fn mesh_2d_to_vtk<
     triangles: &[usize],
     p: P,
 ) {
+    println!("INFO: vtk::mesh_2d_to_vtk");
     let mut points = Vec::new();
     for p in &mesh.points {
         points.push(p.x);

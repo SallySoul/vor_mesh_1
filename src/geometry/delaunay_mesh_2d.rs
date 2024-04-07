@@ -205,4 +205,11 @@ impl<TC: InCircleTest<Point = Vec2d>, TT: InTriangleTest, TO: TriangleOrientatio
         self.triangles[ti].bc = t.ca;
         self.triangles[ti].ca = t.ab;
     }
+
+    pub fn triangle_center(&self, ti: usize) -> Vec2d {
+        let a = self.points[self.triangles[ti].a];
+        let b = self.points[self.triangles[ti].b];
+        let c = self.points[self.triangles[ti].c];
+        (a + b + c) / 3.0
+    }
 }
