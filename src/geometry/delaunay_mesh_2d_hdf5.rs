@@ -116,9 +116,9 @@ impl<'a, TC: InCircleTest<Point = Vec2d>, TT: InTriangleTest, TO: TriangleOrient
             let t = &self.mesh.triangles[ti];
 
             // Exclude the mesh bounding points
-            let include_a = t.a > 3;
-            let include_b = t.b > 3;
-            let include_c = t.c > 3;
+            let include_a = t.a > 0;
+            let include_b = t.b > 0;
+            let include_c = t.c > 0;
 
             // edge ab
             if unvisited_flag[t.ab] && include_a && include_b {

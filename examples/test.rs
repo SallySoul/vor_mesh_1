@@ -1,4 +1,6 @@
 use rand::prelude::*;
+use rand::rngs::StdRng;
+use rand::SeedableRng;
 use vor_mesh_1::geometry::*;
 
 fn main() {
@@ -7,8 +9,9 @@ fn main() {
     let bc = vec2![-100.0, 100.0];
     let mut mesh = Simple2DMesh::bounded(ba, bb, bc);
     let mut ti = 1;
-    let mut rng = thread_rng();
-    for _ in 0..100 {
+    //let mut rng = thread_rng();
+    let mut rng = StdRng::seed_from_u64(1);
+    for _ in 0..4 {
         let x: f64 = rng.gen_range(-30.0..30.0);
         let y: f64 = rng.gen_range(-30.0..30.0);
         let pi = mesh.add_point(vec2![x, y]);
