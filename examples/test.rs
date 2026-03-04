@@ -11,10 +11,11 @@ fn main() {
     let mut ti = 1;
     //let mut rng = thread_rng();
     let mut rng = StdRng::seed_from_u64(1);
-    for _ in 0..4 {
+    for _ in 0..2 {
         let x: f64 = rng.gen_range(-30.0..30.0);
         let y: f64 = rng.gen_range(-30.0..30.0);
         let pi = mesh.add_point(vec2![x, y]);
+        println!("[{}, {}]",x, y);
         ti = mesh.insert_point(pi, ti).unwrap();
     }
 
@@ -24,5 +25,6 @@ fn main() {
         .add_points()
         .add_delaunay_edges()
         .add_vor_diagram()
+        .add_circum_circles()
         .finish();
 }

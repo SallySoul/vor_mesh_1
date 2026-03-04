@@ -5,6 +5,7 @@ mod edge_flip_2d;
 mod swap_test_2d;
 mod triangle;
 mod voronoi_diagram_2d;
+mod circumcircle;
 
 mod geom_types;
 mod in_circle;
@@ -21,6 +22,7 @@ pub use edge_flip_2d::*;
 pub use swap_test_2d::*;
 pub use triangle::*;
 pub use voronoi_diagram_2d::*;
+pub use circumcircle::*;
 
 pub use geom_types::*;
 pub use in_circle::*;

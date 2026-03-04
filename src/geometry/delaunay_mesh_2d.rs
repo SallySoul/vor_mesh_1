@@ -97,6 +97,7 @@ impl<TC: InCircleTest<Point = Vec2d>, TT: InTriangleTest, TO: TriangleOrientatio
     }
 
     pub fn insert_point(&mut self, pi: usize, ti: usize) -> Result<usize, DelaunayError> {
+        println!("Insert point, pi: {}, ti: {}", pi, ti);
         let p = &self.points[pi];
 
         // Find Triangle
@@ -106,6 +107,8 @@ impl<TC: InCircleTest<Point = Vec2d>, TT: InTriangleTest, TO: TriangleOrientatio
             let a = &self.points[t.a];
             let b = &self.points[t.b];
             let c = &self.points[t.c];
+            let test = self.it_test.in_triangle(a, b, c, p);
+            println!("  test, ti: {}, test: {:?}", ti, test);
             match self.it_test.in_triangle(a, b, c, p) {
                 InTriangle::In => {
                     self.insert_in_triangle(ti, pi);
@@ -211,5 +214,37 @@ impl<TC: InCircleTest<Point = Vec2d>, TT: InTriangleTest, TO: TriangleOrientatio
         let b = self.points[self.triangles[ti].b];
         let c = self.points[self.triangles[ti].c];
         (a + b + c) / 3.0
+    }
+
+    pub fn brute_delaunay_check(&self) {
+        for ti in 1..self.triangles.len() {
+            let t = &self.triangles[ti];
+            for pi in 1..self.points.len() {
+                if pi == t.a || pi == t.b || pi == t.c {
+                    continue;
+                }
+                assert!(!self.in_circle(ti, &self.points[pi]));
+            }
+        }
+    }
+}
+
+#[cfg(test)]
+mod unit_tests {
+    use super::*;
+
+    #[test]
+    fn insert_in_triangle_01() {
+        let ba = vec2![-100.0, -100.0];
+        let bb = vec2![100.0, 0.0];
+        let bc = vec2![-100.0, 100.0];
+        let mut mesh = Simple2DMesh::bounded(ba, bb, bc);
+        let mut ti = 1;
+        let a = vec2![28.45468423550416, 11.474136642139577];
+        let pi = mesh.add_point(a);
+        ti = mesh.insert_point(pi, ti).unwrap();
+        let b = vec2![-4.3215131080277835, -19.4648369883694];
+        let pi = mesh.add_point(b);
+        let _ti = mesh.insert_point(pi, ti).unwrap();
     }
 }

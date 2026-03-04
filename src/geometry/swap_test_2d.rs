@@ -31,6 +31,7 @@ where
     TT: InTriangleTest,
     TO: TriangleOrientationTest,
 {
+    println!("    swap_test_ab, ti: {}", ti);
     let t1 = mesh.triangles[ti].ab;
 
     if t1 == 0 {
@@ -53,6 +54,8 @@ where
     TT: InTriangleTest,
     TO: TriangleOrientationTest,
 {
+    println!("    swap_test_bc, ti: {}", ti);
+
     let t1 = mesh.triangles[ti].bc;
 
     if t1 == 0 {
@@ -75,6 +78,8 @@ where
     TT: InTriangleTest,
     TO: TriangleOrientationTest,
 {
+    println!("    swap_test_ca, ti: {}", ti);
+
     let t1 = mesh.triangles[ti].ca;
 
     if t1 == 0 {
