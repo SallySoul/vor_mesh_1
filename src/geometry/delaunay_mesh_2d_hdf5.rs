@@ -1,5 +1,5 @@
 use crate::geometry::*;
-use hdf5::File;
+use hdf5_metno::File;
 use ndarray::{arr1, arr2};
 
 pub struct Hdf5Builder<
