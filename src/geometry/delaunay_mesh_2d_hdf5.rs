@@ -39,7 +39,7 @@ impl<'a, TC: InCircleTest<Point = Vec2d>, TT: InTriangleTest, TO: TriangleOrient
         // TODO: I think we should be able to pass
         // points directly to dataset builder
         let mut point_data = Vec::with_capacity(self.mesh.points.len());
-        for pi in 1..self.mesh.points.len() {
+        for pi in 4..self.mesh.points.len() {
             let p = &self.mesh.points[pi];
             point_data.push([p.x, p.y]);
         }
@@ -65,9 +65,9 @@ impl<'a, TC: InCircleTest<Point = Vec2d>, TT: InTriangleTest, TO: TriangleOrient
             let t = &self.mesh.triangles[ti];
 
             // Exclude the mesh bounding points
-            let include_a = t.a > 0;
-            let include_b = t.b > 0;
-            let include_c = t.c > 0;
+            let include_a = t.a > 3;
+            let include_b = t.b > 3;
+            let include_c = t.c > 3;
 
             // edge ab
             if unvisited_flag[t.ab] && include_a && include_b {
@@ -116,9 +116,9 @@ impl<'a, TC: InCircleTest<Point = Vec2d>, TT: InTriangleTest, TO: TriangleOrient
             let t = &self.mesh.triangles[ti];
 
             // Exclude the mesh bounding points
-            let include_a = t.a > 0;
-            let include_b = t.b > 0;
-            let include_c = t.c > 0;
+            let include_a = t.a > 3;
+            let include_b = t.b > 3;
+            let include_c = t.c > 3;
 
             // edge ab
             if unvisited_flag[t.ab] && include_a && include_b {

@@ -6,7 +6,7 @@ where
     TT: InTriangleTest,
     TO: TriangleOrientationTest,
 {
-    println!("      flib_ab: {}", ti);
+    //println!("      flib_ab: {}", ti);
     let t = mesh.triangles[ti];
     flip(mesh, t, ti);
 }
@@ -17,7 +17,7 @@ where
     TT: InTriangleTest,
     TO: TriangleOrientationTest,
 {
-    println!("      flib_bc: {}", ti);
+    //println!("      flib_bc: {}", ti);
     let t_ref = mesh.triangles[ti];
     let t = Triangle {
         a: t_ref.b,
@@ -37,7 +37,7 @@ where
     TT: InTriangleTest,
     TO: TriangleOrientationTest,
 {
-    println!("      flib_ca: {}", ti);
+    //println!("      flib_ca: {}", ti);
     let t_ref = mesh.triangles[ti];
     let t = Triangle {
         a: t_ref.c,

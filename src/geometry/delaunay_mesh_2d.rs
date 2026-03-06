@@ -97,7 +97,7 @@ impl<TC: InCircleTest<Point = Vec2d>, TT: InTriangleTest, TO: TriangleOrientatio
     }
 
     pub fn insert_point(&mut self, pi: usize, ti: usize) -> Result<usize, DelaunayError> {
-        println!("Insert point, pi: {}, ti: {}", pi, ti);
+        //println!("Insert point, pi: {}, ti: {}", pi, ti);
         let p = &self.points[pi];
 
         // Find Triangle
@@ -108,7 +108,7 @@ impl<TC: InCircleTest<Point = Vec2d>, TT: InTriangleTest, TO: TriangleOrientatio
             let b = &self.points[t.b];
             let c = &self.points[t.c];
             let test = self.it_test.in_triangle(a, b, c, p);
-            println!("  test, ti: {}, test: {:?}", ti, test);
+            //println!("  test, ti: {}, test: {:?}", ti, test);
             match self.it_test.in_triangle(a, b, c, p) {
                 InTriangle::In => {
                     self.insert_in_triangle(ti, pi);
